@@ -58,7 +58,7 @@ public class FlappyBird extends ApplicationAdapter {
 
     public FlappyBird(DatabaseHandler input_db) {
         db = input_db;
-        db.deleteAllRows();
+//        db.deleteAllRows();
     }
 
     @Override
