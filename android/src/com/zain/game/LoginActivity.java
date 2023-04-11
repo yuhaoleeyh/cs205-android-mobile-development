@@ -23,8 +23,9 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordInput.getText().toString();
         intent.putExtra("username", username);
 
-        if (password != "1234") {
-            Toast.makeText(this, "Wrong password", Toast.LENGTH_SHORT).show();
+        if (!password.equals("hello")) {
+            System.out.println(password);
+            Toast.makeText(this, password, Toast.LENGTH_SHORT).show();
             return;
         }
 
