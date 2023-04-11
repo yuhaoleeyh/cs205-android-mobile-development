@@ -11,10 +11,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import com.zain.game.database.DatabaseHandler;
+import com.zain.game.database.Score;
 
 import java.util.Random;
 
 public class FlappyBird extends ApplicationAdapter {
+    DatabaseHandler db;
+    int currentTopScore;
+
     SpriteBatch batch;
     Texture background;
     // ShapeRenderer shapeRenderer;
@@ -53,6 +58,10 @@ public class FlappyBird extends ApplicationAdapter {
     Rectangle[] topTubeRectangles;
     Rectangle[] bottomTubeRectangles;
 
+    public FlappyBird(DatabaseHandler input_db) {
+        db = input_db;
+    //    db.deleteAllRows();
+    }
 
     @Override
     public void create() {
@@ -91,6 +100,8 @@ public class FlappyBird extends ApplicationAdapter {
 
     public void startGame()
     {
+        currentTopScore = db.getTopScore();
+
         birdY = Gdx.graphics.getHeight() / 2 - birds[flapState].getHeight() / 2;
         upsideDownBirdY = Gdx.graphics.getHeight() / 2 - birds[flapState].getHeight() / 2;
         for (int i = 0; i < numberOfTubes; i++) {
@@ -102,6 +113,13 @@ public class FlappyBird extends ApplicationAdapter {
             bottomTubeRectangles[i] = new Rectangle();
 
         }
+    }
+
+    public void updateScoreDatabase() {
+        db.addScore(new Score("placeholder_name", score));
+        db.deleteExceptTopScores();
+
+        db.logAllScores();
     }
 
     @Override
@@ -180,6 +198,8 @@ public class FlappyBird extends ApplicationAdapter {
 
             if (Gdx.input.justTouched())
             {
+                updateScoreDatabase();
+
                 gameState = 1;
                 startGame();
                 score =0;
@@ -201,6 +221,9 @@ public class FlappyBird extends ApplicationAdapter {
 
         batch.draw(birds[flapState], Gdx.graphics.getWidth() / 2 - birds[flapState].getWidth() / 2, birdY);
         font.draw(batch , String.valueOf(score) , 100 , 200);
+
+        // Render top score so far
+        font.draw(batch , String.valueOf(currentTopScore) , 100 , Gdx.graphics.getHeight() - 100);
 
         batch.draw(upsideDownBirds[flapState], Gdx.graphics.getWidth() / 2 - upsideDownBirds[flapState].getWidth() / 2, upsideDownBirdY);
 
