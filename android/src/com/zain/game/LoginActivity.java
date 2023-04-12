@@ -2,14 +2,20 @@ package com.zain.game;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.view.WindowManager;
 
 
 public class LoginActivity extends AppCompatActivity {
+
+    private ImageView imageView;
+    private Handler handler;
+    private boolean isFirstImageVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,7 +23,24 @@ public class LoginActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
+
+        imageView = findViewById(R.id.imageView);
+        handler = new Handler();
+        toggleImageRunnable.run();
     }
+
+    private final Runnable toggleImageRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isFirstImageVisible) {
+                imageView.setImageResource(R.drawable.bird);
+            } else {
+                imageView.setImageResource(R.drawable.bird2);
+            }
+            isFirstImageVisible = !isFirstImageVisible;
+            handler.postDelayed(this, 100);
+        }
+    };
 
     public void login(View view){
 
