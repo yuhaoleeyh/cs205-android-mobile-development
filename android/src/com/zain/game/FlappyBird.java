@@ -12,7 +12,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.zain.game.database.DatabaseHandler;
 import com.zain.game.database.Score;
 
+
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FlappyBird extends ApplicationAdapter {
     DatabaseHandler db;
@@ -43,7 +46,7 @@ public class FlappyBird extends ApplicationAdapter {
     float gravity = 1;
     Texture topTube;
     Texture bottomTube;
-    float gap = 400;
+    float gap = 800;
     float maxTubeOffset;
     Random randomGenerator;
 
@@ -55,6 +58,9 @@ public class FlappyBird extends ApplicationAdapter {
     float distanceBetweenTheTube;
     Rectangle[] topTubeRectangles;
     Rectangle[] bottomTubeRectangles;
+
+    private final ElapsedTimer elapsedTimer = new ElapsedTimer();
+
 
     public FlappyBird(DatabaseHandler input_db) {
         db = input_db;
@@ -118,6 +124,13 @@ public class FlappyBird extends ApplicationAdapter {
         db.deleteExceptTopScores();
 
         db.logAllScores();
+    }
+
+    public long getSleepTime() {
+        final double targetFrameTime = (1000.0 / 30);
+        final long updateEndTime = System.currentTimeMillis();
+        final long updateTime = updateEndTime - elapsedTimer.getUpdateStartTime();
+        return Math.round(targetFrameTime - updateTime);
     }
 
     @Override
@@ -222,6 +235,11 @@ public class FlappyBird extends ApplicationAdapter {
 
         // Render top score so far
         font.draw(batch , String.valueOf(currentTopScore) , 100 , Gdx.graphics.getHeight() - 100);
+
+        // render the time
+        final long deltaTime = elapsedTimer.progress();
+        font.draw(batch , String.valueOf(deltaTime / 1000) , Gdx.graphics.getWidth() - 300 , 200);
+
 
         batch.draw(upsideDownBirds[flapState], Gdx.graphics.getWidth() / 2 - upsideDownBirds[flapState].getWidth() / 2, upsideDownBirdY);
 
