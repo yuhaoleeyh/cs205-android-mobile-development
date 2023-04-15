@@ -1,5 +1,7 @@
 package com.zain.game;
 
+import android.util.Log;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -13,6 +15,7 @@ import com.zain.game.database.DatabaseHandler;
 import com.zain.game.database.Score;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FlappyBird extends ApplicationAdapter {
     DatabaseHandler db;
@@ -57,6 +60,19 @@ public class FlappyBird extends ApplicationAdapter {
     float distanceBetweenTheTube;
     Rectangle[] topTubeRectangles;
     Rectangle[] bottomTubeRectangles;
+
+    AtomicInteger jumps = new AtomicInteger(0);
+    AtomicInteger scoreAtomic = new AtomicInteger(0);
+
+    AtomicInteger upsideDownJumps = new AtomicInteger(0);
+    AtomicInteger upsideDownScoreAtomic = new AtomicInteger(0);
+
+    BirdThread birdThread = new BirdThread(1, jumps, scoreAtomic, false);
+    BirdThread upsideDownBirdThread = new BirdThread(2, upsideDownJumps, upsideDownScoreAtomic, false);
+
+    Thread thread = new Thread(birdThread);
+    Thread upsideDownThread = new Thread(upsideDownBirdThread);
+
 
     public FlappyBird(DatabaseHandler input_db) {
         db = input_db;
@@ -132,8 +148,11 @@ public class FlappyBird extends ApplicationAdapter {
 
             if (tubeX[scoringTube] < Gdx.graphics.getWidth() / 2) {
                 Gdx.app.log("Score", String.valueOf(score));
+
                 synchronized(mutex) {
-                    score++;
+                    scoreAtomic.getAndAdd(1);
+                    upsideDownScoreAtomic.getAndAdd(1);
+                    score += 2;
                 }
                 if (scoringTube < numberOfTubes - 1) {
                     scoringTube++;
@@ -144,6 +163,9 @@ public class FlappyBird extends ApplicationAdapter {
 
             if (Gdx.input.justTouched()) {
                 System.out.println(Gdx.input.getY());
+
+                jumps.getAndAdd(1);
+                upsideDownJumps.getAndAdd(1);
 
                 if (Gdx.input.getY() > Gdx.graphics.getHeight() / 2) {
                     velocity = -30;
@@ -211,6 +233,10 @@ public class FlappyBird extends ApplicationAdapter {
                 velocity = 0;
                 upsideDownVelocity = 0;
 
+                birdThread.resetJumps();
+                upsideDownBirdThread.resetJumps();
+                birdThread.resetScore();
+                upsideDownBirdThread.resetScore();
 
             }
 
@@ -260,7 +286,12 @@ public class FlappyBird extends ApplicationAdapter {
 
         //shapeRenderer.end();
 
-
+        try {
+            thread.join();
+            upsideDownThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }
