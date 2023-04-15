@@ -213,6 +213,7 @@ public class FlappyBird extends ApplicationAdapter {
 
                 gameState = 1;
                 startGame();
+                elapsedTimer.setInitialized(false);
                 score =0;
                 scoringTube=0;
                 velocity = 0;
@@ -271,7 +272,6 @@ public class FlappyBird extends ApplicationAdapter {
 
 
         //shapeRenderer.end();
-
 
     }
 

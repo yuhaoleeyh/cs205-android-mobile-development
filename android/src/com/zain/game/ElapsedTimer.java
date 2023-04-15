@@ -11,6 +11,13 @@ public class ElapsedTimer {
     public long getUpdateStartTime() {
         return updateStartTime;
     }
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
 
     public long progress() {
         final long now = System.currentTimeMillis();
