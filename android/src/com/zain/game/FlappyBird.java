@@ -21,6 +21,8 @@ public class FlappyBird extends ApplicationAdapter {
     DatabaseHandler db;
     int currentTopScore;
 
+    Object mutex = new Object();
+
     SpriteBatch batch;
     Texture background;
     // ShapeRenderer shapeRenderer;
@@ -143,7 +145,9 @@ public class FlappyBird extends ApplicationAdapter {
 
             if (tubeX[scoringTube] < Gdx.graphics.getWidth() / 2) {
                 Gdx.app.log("Score", String.valueOf(score));
-                score++;
+                synchronized(mutex) {
+                    score++;
+                }
                 if (scoringTube < numberOfTubes - 1) {
                     scoringTube++;
                 } else {
@@ -214,7 +218,9 @@ public class FlappyBird extends ApplicationAdapter {
                 gameState = 1;
                 startGame();
                 elapsedTimer.setInitialized(false);
-                score =0;
+                synchronized(mutex) {
+                    score = 0;
+                }
                 scoringTube=0;
                 velocity = 0;
                 upsideDownVelocity = 0;
