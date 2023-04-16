@@ -60,4 +60,9 @@ public class LoginActivity extends AppCompatActivity {
 
         startActivity(intent);
     }
+
+    public void leaderboard(View view){
+        Intent intent = new Intent(this, LeaderboardActivity.class);
+        startActivity(intent);
+    }
 }
