@@ -1,7 +1,5 @@
 package com.zain.game;
 
-import android.util.Log;
-
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -14,8 +12,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.zain.game.database.DatabaseHandler;
 import com.zain.game.database.Score;
 
+
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FlappyBird extends ApplicationAdapter {
     DatabaseHandler db;
@@ -61,17 +61,7 @@ public class FlappyBird extends ApplicationAdapter {
     Rectangle[] topTubeRectangles;
     Rectangle[] bottomTubeRectangles;
 
-    AtomicInteger jumps = new AtomicInteger(0);
-    AtomicInteger scoreAtomic = new AtomicInteger(0);
-
-    AtomicInteger upsideDownJumps = new AtomicInteger(0);
-    AtomicInteger upsideDownScoreAtomic = new AtomicInteger(0);
-
-    BirdThread birdThread = new BirdThread(1, jumps, scoreAtomic, false);
-    BirdThread upsideDownBirdThread = new BirdThread(2, upsideDownJumps, upsideDownScoreAtomic, false);
-
-    Thread thread = new Thread(birdThread);
-    Thread upsideDownThread = new Thread(upsideDownBirdThread);
+    private final ElapsedTimer elapsedTimer = new ElapsedTimer();
 
 
     public FlappyBird(DatabaseHandler input_db) {
@@ -138,6 +128,13 @@ public class FlappyBird extends ApplicationAdapter {
         db.logAllScores();
     }
 
+    public long getSleepTime() {
+        final double targetFrameTime = (1000.0 / 30);
+        final long updateEndTime = System.currentTimeMillis();
+        final long updateTime = updateEndTime - elapsedTimer.getUpdateStartTime();
+        return Math.round(targetFrameTime - updateTime);
+    }
+
     @Override
     public void render() {
 
@@ -148,11 +145,8 @@ public class FlappyBird extends ApplicationAdapter {
 
             if (tubeX[scoringTube] < Gdx.graphics.getWidth() / 2) {
                 Gdx.app.log("Score", String.valueOf(score));
-
                 synchronized(mutex) {
-                    scoreAtomic.getAndAdd(1);
-                    upsideDownScoreAtomic.getAndAdd(1);
-                    score += 2;
+                    score++;
                 }
                 if (scoringTube < numberOfTubes - 1) {
                     scoringTube++;
@@ -163,9 +157,6 @@ public class FlappyBird extends ApplicationAdapter {
 
             if (Gdx.input.justTouched()) {
                 System.out.println(Gdx.input.getY());
-
-                jumps.getAndAdd(1);
-                upsideDownJumps.getAndAdd(1);
 
                 if (Gdx.input.getY() > Gdx.graphics.getHeight() / 2) {
                     velocity = -30;
@@ -226,6 +217,7 @@ public class FlappyBird extends ApplicationAdapter {
 
                 gameState = 1;
                 startGame();
+                elapsedTimer.setInitialized(false);
                 synchronized(mutex) {
                     score = 0;
                 }
@@ -233,10 +225,6 @@ public class FlappyBird extends ApplicationAdapter {
                 velocity = 0;
                 upsideDownVelocity = 0;
 
-                birdThread.resetJumps();
-                upsideDownBirdThread.resetJumps();
-                birdThread.resetScore();
-                upsideDownBirdThread.resetScore();
 
             }
 
@@ -254,6 +242,11 @@ public class FlappyBird extends ApplicationAdapter {
 
         // Render top score so far
         font.draw(batch , String.valueOf(currentTopScore) , 100 , Gdx.graphics.getHeight() - 100);
+
+        // render the time
+        final long deltaTime = elapsedTimer.progress();
+        font.draw(batch , String.valueOf(deltaTime / 1000) , Gdx.graphics.getWidth() - 300 , 200);
+
 
         batch.draw(upsideDownBirds[flapState], Gdx.graphics.getWidth() / 2 - upsideDownBirds[flapState].getWidth() / 2, upsideDownBirdY);
 
@@ -286,12 +279,6 @@ public class FlappyBird extends ApplicationAdapter {
 
         //shapeRenderer.end();
 
-        try {
-            thread.join();
-            upsideDownThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
 }
