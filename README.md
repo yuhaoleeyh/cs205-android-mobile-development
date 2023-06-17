@@ -1,4 +1,4 @@
-## CS205 Project
+## CS205 Project: Android Mobile Development in Java
 
 <br/>
 
