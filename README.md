@@ -6,9 +6,7 @@ Done by: Lee Yu Hao, Aw Khai Loong, Jonathan Chua, Tay Rui Xian, Yap Bing Yu
 
 ## Crappy Bird Application
 
-<br/>
-
-## Modification of Flappy Bird with the following features:
+Modification of Flappy Bird with the following features:
 
 - 2 birds instead of 1 with threads/synchronised mutex and parallel operations for a multiplayer challenge
 - Scoreboard to keep track (may not work locally as it needs connection to AWS)
